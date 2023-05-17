@@ -15,7 +15,8 @@ const WORDS = [
   'chocolate',
 ];
 
-const numWrong = 0;
+let numWrong = 0;
+let correctGuesses = 0;
 
 // Loop over the letters in `word` and create divs.
 // The divs should be appended to the section with id="word-container".
@@ -26,7 +27,7 @@ const numWrong = 0;
 const createDivsForChars = (word) => {
   const wordContainer = document.querySelector('#word-container');
   for (const letter of word){
-    wordContainer.insertAdjacentHTML('beforeend', `<div class="letter-box ${letter}>"</div>`);
+    wordContainer.insertAdjacentHTML('beforeend', `<div class="letter-box ${letter}"></div>`);
   }
 };
 
@@ -60,20 +61,71 @@ const isLetterInWord = (letter, word) => {
   }
 };
 
+const handleCorrectGuess = (letter) => {
+  const letterDivs = document.querySelectorAll(`.${letter}`);
+  console.log(letterDivs);
+  for (const div of letterDivs){
+    div.innerHTML = letter; 
+  }
+  correctGuesses += 1;
+
+  if (correctGuesses === 5) {
+    buttons = document.querySelectorAll('button');
+    for (const butt of buttons){
+      butt.disabled = true; 
+    }
+  document.querySelector('#win').style.display = 'block';
+  }
+}
+
+const handleWrongGuess = () => {
+  numWrong += 1;
+
+  const sharkImage = document.querySelector('#shark-img img');
+  sharkImage.setAttribute('src', `/static/images/guess${numWrong}.png`);
+
+  if (numWrong === 5){
+    buttons = document.querySelectorAll('button');
+    for (const button of buttons){
+      button.disabled = true; 
+    }
+    document.querySelector('#play-again').style.display = 'block';
+    }
+  }
+
+  
 // This is like if __name__ == '__main__' in Python
 // It will be called when the file is run (because
 // we call the function on line 66)
+const resetGame = () => {
+  window.location = '/sharkwords';
+};
+
 (function startGame() {
   // For now, we'll hardcode the word that the user has to guess
   // You can change this to choose a random word from WORDS once you
   // finish this lab but we hard code it so we know what the word is
   // and can tell if things look correct for this word
   const word = 'hello';
-
   createDivsForChars(word);
-
   generateLetterButtons();
 
-  // in the next lab, you will be adding functionality to handle when
-  // someone clicks on a letter
+  const buttons = document.querySelectorAll('button');
+
+  for(const button of buttons){
+    button.addEventListener('click',() => {
+      disableLetterButton(button);
+
+      const letter = button.innerHTML;
+
+      if(isLetterInWord(letter, word) === true){
+        handleCorrectGuess(letter);
+      }
+      else{
+        handleWrongGuess();
+      }
+    });
+  }
+  document.querySelector('#play-again').addEventListener('click', resetGame);
+  document.querySelector('#win').addEventListener('click', resetGame);
 })();
